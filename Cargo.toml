@@ -8,7 +8,7 @@ repository = "https://github.com/aviani-sb/hydrolix_helpers"
 homepage = "https://github.com/aviani-sb/hydrolix_helpers"  
 readme = "README.md"    
 keywords = ["hydrolix", "data", "rust"] # Relevant keywords for search
-categories = ["data-processing", "utilities"] 
+categories = ["database", "api-bindings"] 
 edition = "2021"            # Specify the Rust edition
 
 [lib]
