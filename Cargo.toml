@@ -11,4 +11,9 @@ keywords = ["hydrolix", "data", "rust"] # Relevant keywords for search
 categories = ["data-processing", "utilities"] 
 edition = "2021"            # Specify the Rust edition
 
+[lib]
+name = "hydrolix_helpers"
+path = "src/lib.rs" 
+
+
 [dependencies]
