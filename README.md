@@ -15,11 +15,36 @@
 
 ---
 
-## Installation
+## Example
+
 
 Add this crate to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-hydrolix_helpers = "0.1.0"
+tokio = { version = "1", features = ["full"] }
+hydrolix_helpers = "0.1.2"
 
+```rust
+use hydrolix_helpers::HydrolixAuth;
+
+#[tokio::main]
+async fn main() {
+    println!("Hello, world!");
+
+    let base_url = "XXX";
+    let username = "XXX";
+    let password = "XXX";
+
+    let auth = HydrolixAuth::new(&base_url, &username, &password);
+
+    // Verify that the token is being cached
+    for i in 0..100 {
+        let t = match auth.clone().get_token().await {
+            Ok(v) => v,
+            Err(e) => panic!("Failed to authenticate: {e}"),
+        };
+        assert!(t.hits == i);
+        println!("t={:?}", t);
+    }
+}
