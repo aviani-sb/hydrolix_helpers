@@ -8,11 +8,11 @@ use tokio::time::Instant;
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
-struct HydrolixToken {
-    value: String,
-    org_list: Vec<String>,
-    expires_at: Instant,
-    hits: usize,
+pub struct HydrolixToken {
+    pub value: String,
+    pub org_list: Vec<String>,
+    pub expires_at: Instant,
+    pub hits: usize,
 }
 
 #[allow(dead_code)]
