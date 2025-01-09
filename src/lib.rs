@@ -13,6 +13,7 @@ pub struct HydrolixToken {
     pub org_list: Vec<String>,
     pub expires_at: Instant,
     pub hits: usize,
+    pub base_url: String,
 }
 
 impl Default for HydrolixToken {
@@ -29,6 +30,7 @@ impl HydrolixToken {
             org_list: vec![],
             expires_at: Instant::now(),
             hits: 0,
+            base_url: "".to_string(),
         }
     }
 }
@@ -163,6 +165,8 @@ impl HydrolixAuth {
             self.token.expires_at = Instant::now() + Duration::from_secs(v)
         }
 
+        self.token.base_url = self.base_url.to_string();
+
         *cache = self.token;
 
         Ok(cache.clone())
@@ -188,6 +192,7 @@ mod tests {
         let password = env::var("TEST_PASSWORD").unwrap();
 
         let auth = HydrolixAuth::new(&base_url, &username, &password);
+        assert!(auth.token.base_url.is_empty());
 
         // Verify that the token is cached
         for i in 0..100 {
