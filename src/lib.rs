@@ -27,7 +27,7 @@ static TOKEN_CACHE: Lazy<Mutex<HydrolixToken>> = Lazy::new(|| {
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
-struct HydrolixAuth {
+pub struct HydrolixAuth {
     base_url: String,
     username: String,
     password: String,
