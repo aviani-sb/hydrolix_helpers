@@ -32,9 +32,9 @@ use hydrolix_helpers::HydrolixAuth;
 async fn main() {
     println!("Hello, world!");
 
-    let base_url = "XXX";
-    let username = "XXX";
-    let password = "XXX";
+    let base_url = env::var("TEST_URL").unwrap();
+    let username = env::var("TEST_LOGIN").unwrap();
+    let password = env::var("TEST_PASSWORD").unwrap();
 
     let auth = HydrolixAuth::new(&base_url, &username, &password);
 

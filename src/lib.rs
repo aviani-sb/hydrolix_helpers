@@ -15,15 +15,26 @@ pub struct HydrolixToken {
     pub hits: usize,
 }
 
+impl Default for HydrolixToken {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[allow(dead_code)]
-static TOKEN_CACHE: Lazy<Mutex<HydrolixToken>> = Lazy::new(|| {
-    Mutex::new(HydrolixToken {
-        value: "".to_string(),
-        org_list: vec![],
-        expires_at: Instant::now(),
-        hits: 0,
-    })
-});
+impl HydrolixToken {
+    pub fn new() -> HydrolixToken {
+        HydrolixToken {
+            value: "".to_string(),
+            org_list: vec![],
+            expires_at: Instant::now(),
+            hits: 0,
+        }
+    }
+}
+
+#[allow(dead_code)]
+static TOKEN_CACHE: Lazy<Mutex<HydrolixToken>> = Lazy::new(|| Mutex::new(HydrolixToken::new()));
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
@@ -72,12 +83,7 @@ impl HydrolixAuth {
             username: username.to_string(),
             password: password.to_string(),
             http_client: reqwest::Client::new(),
-            token: HydrolixToken {
-                value: "".to_string(),
-                org_list: vec![],
-                expires_at: Instant::now(),
-                hits: 0,
-            },
+            token: HydrolixToken::new(),
         }
     }
 
@@ -165,13 +171,21 @@ impl HydrolixAuth {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::HydrolixAuth;
+    use crate::HydrolixToken;
+    use std::env;
+
+    #[tokio::test]
+    async fn test_token() {
+        let x = HydrolixToken::new();
+        assert!(x.hits == 0);
+    }
 
     #[tokio::test]
     async fn test_get_token() {
-        let base_url = "XXX";
-        let username = "XXX";
-        let password = "XXX";
+        let base_url = env::var("TEST_URL").unwrap();
+        let username = env::var("TEST_LOGIN").unwrap();
+        let password = env::var("TEST_PASSWORD").unwrap();
 
         let auth = HydrolixAuth::new(&base_url, &username, &password);
 
@@ -181,6 +195,10 @@ mod tests {
                 Ok(v) => assert!(v.hits == i),
                 Err(e) => panic!("Failed to authenticate: {e}"),
             }
+        }
+        match auth.clone().get_token().await {
+            Ok(v) => println!("Token={:?}", v),
+            Err(e) => panic!("Failed to authenticate: {e}"),
         }
     }
 }
