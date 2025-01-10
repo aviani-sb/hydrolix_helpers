@@ -1,6 +1,3 @@
-pub mod auth;
-/* 
-
 use once_cell::sync::Lazy;
 use reqwest::header::CONTENT_TYPE;
 use reqwest::Client;
@@ -185,8 +182,8 @@ impl HydrolixAuth {
 
 #[cfg(test)]
 mod tests {
-    use crate::HydrolixAuth;
-    use crate::HydrolixToken;
+    use crate::auth::HydrolixAuth;
+    use crate::auth::HydrolixToken;
     use std::env;
 
     #[tokio::test]
@@ -221,4 +218,3 @@ mod tests {
     }
 }
 // Verify the token value and organization
-*/

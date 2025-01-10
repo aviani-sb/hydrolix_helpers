@@ -26,7 +26,7 @@ tokio = { version = "1", features = ["full"] }
 hydrolix_helpers = "0.1.2"
 
 ```rust
-use hydrolix_helpers::HydrolixAuth;
+use hydrolix_helpers::auth::HydrolixAuth;
 
 #[tokio::main]
 async fn main() {
