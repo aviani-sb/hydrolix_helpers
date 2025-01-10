@@ -33,6 +33,12 @@ impl HydrolixToken {
             base_url: "".to_string(),
         }
     }
+    pub fn first_org(self) -> String {
+        match self.org_list.first() {
+            Some(v) => v.to_string(),
+            None => "".to_string(),
+        }
+    }
 }
 
 #[allow(dead_code)]
@@ -197,7 +203,10 @@ mod tests {
         // Verify that the token is cached
         for i in 0..100 {
             match auth.clone().get_token().await {
-                Ok(v) => assert!(v.hits == i),
+                Ok(v) => {
+                    assert!(v.hits == i);
+                    assert!(!v.first_org().is_empty());
+                }
                 Err(e) => panic!("Failed to authenticate: {e}"),
             }
         }
