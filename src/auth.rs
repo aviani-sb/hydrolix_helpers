@@ -7,10 +7,20 @@ use tokio::time::Duration;
 use tokio::time::Instant;
 
 #[allow(dead_code)]
+#[derive(Debug, Deserialize, Clone)]
+pub struct Org {
+    pub uuid: String,
+    pub name: String,
+    pub cloud: String,
+    #[serde(default)]
+    pub kubernetes: bool,
+}
+
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct HydrolixToken {
     pub value: String,
-    pub org_list: Vec<String>,
+    pub org_list: Vec<Org>,
     pub expires_at: Instant,
     pub hits: usize,
     pub base_url: String,
@@ -21,7 +31,6 @@ impl Default for HydrolixToken {
         Self::new()
     }
 }
-
 
 #[allow(dead_code)]
 impl HydrolixToken {
@@ -36,7 +45,7 @@ impl HydrolixToken {
     }
     pub fn first_org(self) -> String {
         match self.org_list.first() {
-            Some(v) => v.to_string(),
+            Some(v) => v.name.to_string(),
             None => "".to_string(),
         }
     }
@@ -65,16 +74,6 @@ struct AuthToken {
 
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]
-struct Org {
-    uuid: String,
-    name: String,
-    cloud: String,
-    #[serde(default)]
-    kubernetes: bool,
-}
-
-#[allow(dead_code)]
-#[derive(Debug, Deserialize)]
 struct ParsedResponse {
     auth_token: AuthToken,
     orgs: Vec<Org>,
@@ -86,23 +85,39 @@ struct ParsedResponse {
 
 #[allow(dead_code)]
 impl HydrolixAuth {
-    pub fn new(base_url: &str, username: &str, password: &str) -> Self {
+    pub async fn new(base_url: &str, username: &str, password: &str) -> Self {
+        let token: HydrolixToken = HydrolixToken {
+            base_url: base_url.to_string(),
+            value: "".to_string(),
+            org_list: vec![],
+            expires_at: Instant::now(),
+            hits: 0,
+        };
+        let mut cache = TOKEN_CACHE.lock().await;
+        *cache = token.clone();
+
         HydrolixAuth {
             base_url: base_url.to_string(),
             username: username.to_string(),
             password: password.to_string(),
             http_client: reqwest::Client::new(),
-            token: HydrolixToken::new(),
+            token: token.clone(),
         }
     }
 
-    pub async fn get_token(mut self) -> Result<HydrolixToken, String> {
-        let mut cache = TOKEN_CACHE.lock().await;
+    pub fn get_base_url(self) -> String {
+        self.token.base_url.to_string()
+    }
 
-        // Check if token is cached and not expired
-        if cache.expires_at >= Instant::now() {
-            cache.hits += 1;
-            return Ok(cache.clone());
+    pub async fn get_token(mut self) -> Result<HydrolixToken, String> {
+        {
+            let mut cache = TOKEN_CACHE.lock().await;
+
+            // Check if token is cached and not expired
+            if cache.expires_at >= Instant::now() {
+                cache.hits += 1;
+                return Ok(cache.clone());
+            }
         }
 
         // Fetch new token if not cached or expired
@@ -164,8 +179,8 @@ impl HydrolixAuth {
             Err(e) => return Err(format!("{}.{} Failed to parse data {e}", file!(), line!())),
         };
 
-        for i in parsed.orgs {
-            self.token.org_list.push(i.uuid.to_string());
+        for o in &parsed.orgs {
+            self.token.org_list.push(o.clone());
         }
         self.token.value = parsed.auth_token.access_token.to_string();
         if let Some(v) = parsed.auth_token.expires_in {
@@ -174,9 +189,13 @@ impl HydrolixAuth {
 
         self.token.base_url = self.base_url.to_string();
 
-        *cache = self.token;
+        {
+            let mut cache = TOKEN_CACHE.lock().await;
 
-        Ok(cache.clone())
+            *cache = self.token;
+
+            Ok(cache.clone())
+        }
     }
 }
 
@@ -184,7 +203,8 @@ impl HydrolixAuth {
 mod tests {
     use crate::auth::HydrolixAuth;
     use crate::auth::HydrolixToken;
-    use std::env;
+    use crate::hydrolix_secrets;
+    use std::fs;
 
     #[tokio::test]
     async fn test_token() {
@@ -194,26 +214,40 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_token() {
-        let base_url = env::var("TEST_URL").unwrap();
-        let username = env::var("TEST_LOGIN").unwrap();
-        let password = env::var("TEST_PASSWORD").unwrap();
+        let file_path = "/tmp/fleet.secrets.toml";
 
-        let auth = HydrolixAuth::new(&base_url, &username, &password);
-        assert!(auth.token.base_url.is_empty());
+        // Read the file into a string
+        let content = match fs::read_to_string(file_path) {
+            Ok(v) => v.to_string(),
+            Err(e) => panic!("Failed to read file: {e}"),
+        };
 
-        // Verify that the token is cached
-        for i in 0..100 {
+        // Parse the TOML content into the Config struct
+        let config: hydrolix_secrets::Config = match toml::from_str(&content) {
+            Ok(v) => v,
+            Err(e) => panic!("Failed to parse config: {e}"),
+        };
+
+        for m in &config.machines {
+            assert!(!m.base_url.is_empty());
+
+            let auth = HydrolixAuth::new(&m.base_url, &m.username, &m.password).await;
+
             match auth.clone().get_token().await {
-                Ok(v) => {
-                    assert!(v.hits == i);
-                    assert!(!v.first_org().is_empty());
-                }
+                Ok(_) => (),
                 Err(e) => panic!("Failed to authenticate: {e}"),
             }
-        }
-        match auth.clone().get_token().await {
-            Ok(v) => println!("Token={:?}", v),
-            Err(e) => panic!("Failed to authenticate: {e}"),
+
+            // Verify that the token is cached
+            for i in 1..100 {
+                match auth.clone().get_token().await {
+                    Ok(v) => {
+                        assert!(v.hits == i);
+                        assert!(!v.first_org().is_empty());
+                    }
+                    Err(e) => panic!("Failed to authenticate: {e}"),
+                }
+            }
         }
     }
 }
