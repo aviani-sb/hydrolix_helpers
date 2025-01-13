@@ -1,50 +1,47 @@
 # Hydrolix Helpers
 
-[![Crates.io](https://img.shields.io/crates/v/hydrolix_helpers.svg)](https://crates.io/crates/hydrolix_helpers)
-[![Documentation](https://docs.rs/hydrolix_helpers/badge.svg)](https://docs.rs/hydrolix_helpers)
+Hydrolix Helpers is an unofficial Rust library designed to simplify interactions with Hydrolix, a high-performance analytics database. This crate provides utility functions and abstractions for common tasks such as querying, data ingestion, and managing configurations.
 
-**Hydrolix Helpers** is an unofficial Rust library designed to simplify interactions with [Hydrolix](https://www.hydrolix.io), a high-performance analytics database. This crate provides utility functions and abstractions for common tasks such as querying, ingesting data, and managing configurations.
+## Modules
 
----
-
-## Features
-
-- Easy-to-use APIs for interacting with Hydrolix
-- Helper functions for constructing and executing queries
-- Utilities for working with Hydrolix-specific data formats
-
----
-
-## Example
+* auth.rs
+* dump.rs 
 
 
-Add this crate to your `Cargo.toml`:
+## Installation
+
+Add hydrolix_helpers to your Cargo.toml dependencies:
 
 ```toml
 [dependencies]
 tokio = { version = "1", features = ["full"] }
-hydrolix_helpers = "0.1.2"
+hydrolix_helpers = "0.1.X"
+```
 
-```rust
-use hydrolix_helpers::auth::HydrolixAuth;
+### Configuration
 
-#[tokio::main]
-async fn main() {
-    println!("Hello, world!");
+Store your cluster configurations in a Secrets.toml file. Here’s an example:
 
-    let base_url = env::var("TEST_URL").unwrap();
-    let username = env::var("TEST_LOGIN").unwrap();
-    let password = env::var("TEST_PASSWORD").unwrap();
+```toml
 
-    let auth = HydrolixAuth::new(&base_url, &username, &password);
+[[machines]]
+base_url = "https://example-cluster-1.example.com"
+username = "user1@example.com"
+password = "your-password-here"
 
-    // Verify that the token is being cached
-    for i in 0..100 {
-        let t = match auth.clone().get_token().await {
-            Ok(v) => v,
-            Err(e) => panic!("Failed to authenticate: {e}"),
-        };
-        assert!(t.hits == i);
-        println!("t={:?}", t);
-    }
-}
+[[machines]]
+base_url = "https://example-cluster-2.example.com"
+username = "user2@example.com"
+password = "your-password-here"
+```
+
+This file allows the library to load and manage credentials for each cluster.
+
+### Contributing
+
+I welcome contributions! Feel free to submit pull requests or report issues in the GitHub repository.
+
+### License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
+
