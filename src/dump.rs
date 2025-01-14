@@ -33,7 +33,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<cluster::Cluster>, S
                 auth_token.base_url, root_org.uuid
             );
 
-            let json_data = match http::get_data(auth_token, &url).await {
+            let json_data = match http::get_data(&auth_token.value, &url).await {
                 Ok(v) => v,
                 Err(e) => {
                     return Err(format!("{}.{} Error: {e}", file!(), line!()));
@@ -63,7 +63,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<cluster::Cluster>, S
             auth_token.base_url, root_org.uuid
         );
 
-        let json_data = match http::get_data(auth_token, &url).await {
+        let json_data = match http::get_data(&auth_token.value, &url).await {
             Ok(v) => v,
             Err(e) => {
                 return Err(format!("{}.{} Error: {e}", file!(), line!()));
@@ -83,7 +83,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<cluster::Cluster>, S
                 auth_token.base_url, org.uuid, p.uuid
             );
 
-            let json_data = match http::get_data(auth_token, &url).await {
+            let json_data = match http::get_data(&auth_token.value, &url).await {
                 Ok(v) => v,
                 Err(e) => {
                     return Err(format!("{}.{} Error: {e}", file!(), line!()));
@@ -115,7 +115,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<cluster::Cluster>, S
                 auth_token.base_url, org.uuid, p.uuid
             );
 
-            let json_data = match http::get_data(auth_token, &url).await {
+            let json_data = match http::get_data(&auth_token.value, &url).await {
                 Ok(v) => v,
                 Err(e) => {
                     return Err(format!("{}.{} Error: {e}", file!(), line!()));
@@ -137,7 +137,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<cluster::Cluster>, S
                     auth_token.base_url, org.uuid, p.uuid, t.uuid
                 );
 
-                let json_data = match http::get_data(auth_token, &url).await {
+                let json_data = match http::get_data(&auth_token.value, &url).await {
                     Ok(v) => v,
                     Err(e) => {
                         return Err(format!("{}.{} Error: {e}", file!(), line!()));

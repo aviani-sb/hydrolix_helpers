@@ -1,15 +1,14 @@
-use crate::auth::HydrolixToken;
 use reqwest::header::CONTENT_TYPE;
 use reqwest::Client;
 use tokio::time::Duration;
 
-pub async fn get_data(auth_token: &HydrolixToken, url: &str) -> Result<String, String> {
+pub async fn get_data(auth_token: &str, url: &str) -> Result<String, String> {
     let http_client = Client::new();
 
     // Send the authentication request
     let response = http_client
         .get(url)
-        .bearer_auth(auth_token.clone().value)
+        .bearer_auth(auth_token)
         .header("accept", "application/json")
         .header(CONTENT_TYPE, "application/json")
         .timeout(Duration::from_secs(60))
