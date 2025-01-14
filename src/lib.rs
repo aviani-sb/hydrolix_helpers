@@ -1,11 +1,4 @@
 pub mod auth;
 pub mod dump;
 pub mod http;
-pub mod hydrolix_cluster;
-pub mod hydrolix_function;
-pub mod hydrolix_org;
-pub mod hydrolix_project;
-pub mod hydrolix_secrets;
-pub mod hydrolix_storage;
-pub mod hydrolix_table;
-pub mod hydrolix_transform;
+pub mod hydrolix;

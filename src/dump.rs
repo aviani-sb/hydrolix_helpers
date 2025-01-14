@@ -2,22 +2,22 @@ use serde_json;
 
 use crate::auth::HydrolixToken;
 use crate::http;
-use crate::hydrolix_cluster;
-use crate::hydrolix_function;
-use crate::hydrolix_org;
-use crate::hydrolix_project;
-use crate::hydrolix_storage;
-use crate::hydrolix_table;
-use crate::hydrolix_transform;
+use crate::hydrolix::cluster;
+use crate::hydrolix::org;
+use crate::hydrolix::storage;
+use crate::hydrolix::project;
+use crate::hydrolix::function;
+use crate::hydrolix::table;
+use crate::hydrolix::transform;
 
-pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<hydrolix_cluster::Cluster>, String> {
-    let mut cluster: Box<hydrolix_cluster::Cluster> = Box::new(hydrolix_cluster::Cluster {
+pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<cluster::Cluster>, String> {
+    let mut cluster: Box<cluster::Cluster> = Box::new(cluster::Cluster {
         base_url: auth_token.base_url.to_string(),
         orgs: None,
     });
 
     for org in &auth_token.org_list {
-        let mut root_org: hydrolix_org::Org = hydrolix_org::Org {
+        let mut root_org: org::Org = org::Org {
             name: org.name.to_string(),
             uuid: org.uuid.to_string(),
             cloud: org.cloud.to_string(),
@@ -40,7 +40,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<hydrolix_cluster::Cl
                 }
             };
 
-            let mut storages: Vec<hydrolix_storage::Storage> =
+            let mut storages: Vec<storage::Storage> =
                 match serde_json::from_str(&json_data) {
                     Ok(v) => v,
                     Err(e) => {
@@ -70,7 +70,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<hydrolix_cluster::Cl
             }
         };
 
-        let mut projects: Vec<hydrolix_project::Project> = match serde_json::from_str(&json_data) {
+        let mut projects: Vec<project::Project> = match serde_json::from_str(&json_data) {
             Ok(v) => v,
             Err(e) => {
                 return Err(format!("{}.{} Error: {e}", file!(), line!()));
@@ -90,7 +90,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<hydrolix_cluster::Cl
                 }
             };
 
-            let functions: Vec<hydrolix_function::Function> = match serde_json::from_str(&json_data)
+            let functions: Vec<function::Function> = match serde_json::from_str(&json_data)
             {
                 Ok(v) => v,
                 Err(e) => {
@@ -122,7 +122,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<hydrolix_cluster::Cl
                 }
             };
 
-            let mut tables: Vec<hydrolix_table::Table> = match serde_json::from_str(&json_data) {
+            let mut tables: Vec<table::Table> = match serde_json::from_str(&json_data) {
                 Ok(v) => v,
                 Err(e) => {
                     return Err(format!("{}.{} Error: {e}", file!(), line!()));
@@ -144,7 +144,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<hydrolix_cluster::Cl
                     }
                 };
 
-                let mut transforms: Vec<hydrolix_transform::Transform> =
+                let mut transforms: Vec<transform::Transform> =
                     match serde_json::from_str(&json_data) {
                         Ok(v) => v,
                         Err(e) => {
@@ -202,7 +202,7 @@ mod tests {
     use std::io;
 
     use crate::auth::HydrolixAuth;
-    use crate::hydrolix_secrets;
+    use crate::hydrolix::secrets;
 
     use super::dump;
 
@@ -227,7 +227,7 @@ mod tests {
         };
 
         // Parse the TOML content into the Config struct
-        let config: hydrolix_secrets::Config = match toml::from_str(&content) {
+        let config: secrets::Config = match toml::from_str(&content) {
             Ok(v) => v,
             Err(e) => panic!("Failed to parse config: {e}"),
         };
@@ -248,7 +248,7 @@ mod tests {
         };
 
         // Parse the TOML content into the Config struct
-        let config: hydrolix_secrets::Config = match toml::from_str(&content) {
+        let config: secrets::Config = match toml::from_str(&content) {
             Ok(v) => v,
             Err(e) => panic!("Failed to parse config: {e}"),
         };
@@ -276,7 +276,7 @@ mod tests {
         };
 
         // Parse the TOML content into the Config struct
-        let config: hydrolix_secrets::Config = match toml::from_str(&content) {
+        let config: secrets::Config = match toml::from_str(&content) {
             Ok(v) => v,
             Err(e) => panic!("Failed to parse config: {e}"),
         };

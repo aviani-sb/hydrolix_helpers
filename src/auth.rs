@@ -203,7 +203,7 @@ impl HydrolixAuth {
 mod tests {
     use crate::auth::HydrolixAuth;
     use crate::auth::HydrolixToken;
-    use crate::hydrolix_secrets;
+    use crate::hydrolix;
     use std::fs;
 
     #[tokio::test]
@@ -223,7 +223,7 @@ mod tests {
         };
 
         // Parse the TOML content into the Config struct
-        let config: hydrolix_secrets::Config = match toml::from_str(&content) {
+        let config: hydrolix::secrets::Config = match toml::from_str(&content) {
             Ok(v) => v,
             Err(e) => panic!("Failed to parse config: {e}"),
         };
