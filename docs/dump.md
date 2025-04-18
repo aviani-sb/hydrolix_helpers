@@ -23,9 +23,9 @@ use hydrolix_helpers::dump::dump;
 
 #[tokio::main]
 async fn main() {
-    let auth_token = HydrolixAuth::new("https://example-cluster.com", "username", "password")
-        .get_token()
-        .await
+    let auth = HydrolixAuth::new("localhost:3001", "ci@hydrolix.net", "test").await;
+
+    let auth_token = auth.get_token().await
         .expect("Failed to authenticate");
 
     match dump(&auth_token).await {
