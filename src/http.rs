@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use reqwest::header::CONTENT_TYPE;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -51,11 +52,29 @@ pub struct PaginatedResults {
     pub results: Vec<HashMap<String, Value>>,
 }
 
+#[async_trait]
+pub trait Methods {
+    async fn get_data(&self, url: &str, auth_token: &str) -> Result<String, String>;
+}
+
+#[derive(Default)]
+pub struct Http {}
+#[async_trait]
+impl Methods for Http {
+    async fn get_data(&self, url: &str, auth_token: &str) -> Result<String, String> {
+        get_data(url, auth_token).await
+    }
+}
+
+pub async fn get_paginated(url: &str, auth_token: &str) -> Result<String, String> {
+    get_paginated_helper(url, auth_token, &Http::default()).await
+}
+
 // The signature mimics `http::get_data`.  The caller will deserialize the array of json themselves, so return a string
-pub async fn get_paginated(
+pub async fn get_paginated_helper(
     auth_token: &str,
     url: &str,
-    get_method_: impl AsyncFn(&str, &str) -> Result<String, String>,
+    methods: &impl Methods,
 ) -> Result<String, String> {
     let mut page = 1;
     let mut more_results = true;
@@ -64,7 +83,7 @@ pub async fn get_paginated(
         let page_url = url.to_owned() + "?page=" + &page.to_string();
 
         // Send the HTTP GET request to retrieve the list
-        let data = match get_method_(auth_token, &page_url).await {
+        let data = match methods.get_data(auth_token, &page_url).await {
             Ok(v) => v,
             Err(e) => return Err(format!("{}.{} Failed to execute: {e}", file!(), line!())),
         };

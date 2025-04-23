@@ -33,8 +33,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<cluster::Cluster>, S
                 auth_token.base_url, root_org.uuid
             );
 
-            let json_data = match http::get_paginated(&auth_token.value, &url, http::get_data).await
-            {
+            let json_data = match http::get_paginated(&auth_token.value, &url).await {
                 Ok(v) => v,
                 Err(e) => {
                     return Err(format!("{}.{} Error: {e}", file!(), line!()));
@@ -63,7 +62,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<cluster::Cluster>, S
             auth_token.base_url, root_org.uuid
         );
 
-        let json_data = match http::get_paginated(&auth_token.value, &url, http::get_data).await {
+        let json_data = match http::get_paginated(&auth_token.value, &url).await {
             Ok(v) => v,
             Err(e) => {
                 return Err(format!("{}.{} Error: {e}", file!(), line!()));
@@ -83,8 +82,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<cluster::Cluster>, S
                 auth_token.base_url, org.uuid, p.uuid
             );
 
-            let json_data = match http::get_paginated(&auth_token.value, &url, http::get_data).await
-            {
+            let json_data = match http::get_paginated(&auth_token.value, &url).await {
                 Ok(v) => v,
                 Err(e) => {
                     return Err(format!("{}.{} Error: {e}", file!(), line!()));
@@ -115,8 +113,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<cluster::Cluster>, S
                 auth_token.base_url, org.uuid, p.uuid
             );
 
-            let json_data = match http::get_paginated(&auth_token.value, &url, http::get_data).await
-            {
+            let json_data = match http::get_paginated(&auth_token.value, &url).await {
                 Ok(v) => v,
                 Err(e) => {
                     return Err(format!("{}.{} Error: {e}", file!(), line!()));
@@ -138,13 +135,12 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<cluster::Cluster>, S
                     auth_token.base_url, org.uuid, p.uuid, t.uuid
                 );
 
-                let json_data =
-                    match http::get_paginated(&auth_token.value, &url, http::get_data).await {
-                        Ok(v) => v,
-                        Err(e) => {
-                            return Err(format!("{}.{} Error: {e}", file!(), line!()));
-                        }
-                    };
+                let json_data = match http::get_paginated(&auth_token.value, &url).await {
+                    Ok(v) => v,
+                    Err(e) => {
+                        return Err(format!("{}.{} Error: {e}", file!(), line!()));
+                    }
+                };
 
                 let mut transforms: Vec<transform::Transform> =
                     match serde_json::from_str(&json_data) {
