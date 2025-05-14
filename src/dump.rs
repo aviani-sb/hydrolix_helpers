@@ -3,10 +3,10 @@ use serde_json;
 use crate::auth::HydrolixToken;
 use crate::http;
 use crate::hydrolix::cluster;
-use crate::hydrolix::org;
-use crate::hydrolix::storage;
-use crate::hydrolix::project;
 use crate::hydrolix::function;
+use crate::hydrolix::org;
+use crate::hydrolix::project;
+use crate::hydrolix::storage;
 use crate::hydrolix::table;
 use crate::hydrolix::transform;
 
@@ -33,20 +33,19 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<cluster::Cluster>, S
                 auth_token.base_url, root_org.uuid
             );
 
-            let json_data = match http::get_data(&auth_token.value, &url).await {
+            let json_data = match http::get_paginated(&auth_token.value, &url).await {
                 Ok(v) => v,
                 Err(e) => {
                     return Err(format!("{}.{} Error: {e}", file!(), line!()));
                 }
             };
 
-            let mut storages: Vec<storage::Storage> =
-                match serde_json::from_str(&json_data) {
-                    Ok(v) => v,
-                    Err(e) => {
-                        return Err(format!("{}.{} Error: {e}", file!(), line!()));
-                    }
-                };
+            let mut storages: Vec<storage::Storage> = match serde_json::from_str(&json_data) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!("{}.{} Error: {e}", file!(), line!()));
+                }
+            };
 
             for s in &mut storages {
                 if root_org.storages.is_none() {
@@ -63,7 +62,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<cluster::Cluster>, S
             auth_token.base_url, root_org.uuid
         );
 
-        let json_data = match http::get_data(&auth_token.value, &url).await {
+        let json_data = match http::get_paginated(&auth_token.value, &url).await {
             Ok(v) => v,
             Err(e) => {
                 return Err(format!("{}.{} Error: {e}", file!(), line!()));
@@ -83,15 +82,14 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<cluster::Cluster>, S
                 auth_token.base_url, org.uuid, p.uuid
             );
 
-            let json_data = match http::get_data(&auth_token.value, &url).await {
+            let json_data = match http::get_paginated(&auth_token.value, &url).await {
                 Ok(v) => v,
                 Err(e) => {
                     return Err(format!("{}.{} Error: {e}", file!(), line!()));
                 }
             };
 
-            let functions: Vec<function::Function> = match serde_json::from_str(&json_data)
-            {
+            let functions: Vec<function::Function> = match serde_json::from_str(&json_data) {
                 Ok(v) => v,
                 Err(e) => {
                     return Err(format!("{}.{} Error: {e}", file!(), line!()));
@@ -115,7 +113,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<cluster::Cluster>, S
                 auth_token.base_url, org.uuid, p.uuid
             );
 
-            let json_data = match http::get_data(&auth_token.value, &url).await {
+            let json_data = match http::get_paginated(&auth_token.value, &url).await {
                 Ok(v) => v,
                 Err(e) => {
                     return Err(format!("{}.{} Error: {e}", file!(), line!()));
@@ -137,7 +135,7 @@ pub async fn dump(auth_token: &HydrolixToken) -> Result<Box<cluster::Cluster>, S
                     auth_token.base_url, org.uuid, p.uuid, t.uuid
                 );
 
-                let json_data = match http::get_data(&auth_token.value, &url).await {
+                let json_data = match http::get_paginated(&auth_token.value, &url).await {
                     Ok(v) => v,
                     Err(e) => {
                         return Err(format!("{}.{} Error: {e}", file!(), line!()));
