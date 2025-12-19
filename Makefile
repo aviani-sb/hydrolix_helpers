@@ -10,6 +10,9 @@ code-coverage:
 test:
 	cargo nextest run
 	
+push: 
+	cargo publish 
+	
 help: 
 	@echo "CLEAN CODE"
 	@echo "=====> make clean_code"
