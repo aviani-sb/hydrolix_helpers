@@ -13,6 +13,9 @@ test:
 publish: 
 	cargo publish 
 
+security-scan:
+	cargo audit
+
 help: 
 	@echo "CLEAN CODE"
 	@echo "=====> make clean_code"
